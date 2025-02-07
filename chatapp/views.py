@@ -23,8 +23,6 @@ def ask_question(request):
         prev_intent = session.get("intent")
         session_entities = session.get("entities", {})
 
-        print(analysis_result)
-
         # Si la intención ha cambiado, limpiamos la sesión completamente
         if prev_intent and new_intent != prev_intent and analysis_result["confidence"] > 0.95:
             session.pop("entities", None)
