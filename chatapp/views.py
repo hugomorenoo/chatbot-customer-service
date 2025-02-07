@@ -19,6 +19,9 @@ def ask_question(request):
         new_intent = analysis_result["top_intent"]
         entities = analysis_result.get("entities", {})
 
+        # Lista de tallas válidas para evitar confusión con productos
+        valid_sizes = {"XS", "S", "M", "L", "XL", "XXL"}
+
         # Recuperamos la intención previa y entidades almacenadas en sesión
         prev_intent = session.get("intent")
         session_entities = session.get("entities", {})
@@ -30,25 +33,31 @@ def ask_question(request):
         elif not prev_intent:
             session["intent"] = new_intent  # Guardamos la intención si es la primera vez
 
-        # Función para actualizar entidades en sesión
+        # Función para actualizar entidades en sesión sin confusión
         def update_context(category):
             return next((e["text"] for e in entities if e["category"] == category), session_entities.get(category))
 
-        # Manejo especial para Producto: Si el usuario menciona un nuevo producto, lo reemplazamos
+        # Manejo especial para Producto y Talla
         nuevo_producto = next((e["text"] for e in entities if e["category"] == "Producto"), None)
+        nueva_talla = next((e["text"] for e in entities if e["category"] == "Talla"), None)
+
+        # Validar si el producto detectado es una talla por error
+        if nuevo_producto and nuevo_producto in valid_sizes:
+            nuevo_producto = None  # Lo descartamos porque en realidad es una talla
+
+        # Actualizar la sesión con los valores correctos
         if nuevo_producto:
-            session_entities["Producto"] = nuevo_producto  # Reemplazamos la entidad anterior
-        
-        # Actualizamos las entidades en sesión
+            session_entities["Producto"] = nuevo_producto
+        if nueva_talla:
+            session_entities["Talla"] = nueva_talla
+
+        # Guardamos los valores filtrados en sesión
         session["entities"] = session_entities
 
         # Procesamos la intención detectada
         if new_intent == "CambioProducto":
             producto = session_entities.get("Producto")
-            talla = update_context("Talla")
-
-            # Guardamos el estado actualizado en sesión
-            session["entities"] = {"Producto": producto, "Talla": talla}
+            talla = session_entities.get("Talla")
 
             if producto and talla:
                 response = f"Genial! Vamos a cambiar tu {producto} por una talla {talla}. Acude a tienda o al depósito más cercano para hacer efectiva la devolución 😁.\n\n¿Necesitas ayuda con otra cosa?"
@@ -61,7 +70,6 @@ def ask_question(request):
 
         elif new_intent == "DevolucionProducto":
             producto = session_entities.get("Producto")
-            session["entities"] = {"Producto": producto}
 
             if producto:
                 response = f"😰 Ups, sentimos que tengas que devolver tu {producto}. Puedes acercarte a nuestra tienda o a tu depósito más cercano.\n\n¿Necesitas ayuda con otra cosa?"
@@ -71,8 +79,7 @@ def ask_question(request):
                 response = "¿Podrías especificar qué producto deseas devolver?"
 
         elif new_intent == "EstadoDevolucion":
-            numero_pedido = update_context("NumeroPedido")
-            session["entities"] = {"NumeroPedido": numero_pedido}
+            numero_pedido = session_entities.get("NumeroPedido")
 
             if numero_pedido:
                 response = f"El estado de tu devolución con número {numero_pedido} está actualmente en proceso.\n\n¿Necesitas ayuda con otra cosa?"
