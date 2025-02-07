@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot de FAQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript">
+        var csrfToken = '{{ csrf_token }}';
+    </script>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-center h-screen">
+    <header class="text-center mb-6">
+        <h1 class="text-4xl font-bold text-gray-800">La Tienda de Hugo</h1>
+        <p class="text-gray-600 mt-4 max-w-lg">
+            Esto es un chat de preguntas y respuestas de cambios y devoluciones, siéntete free de preguntar lo que quieras. Por ejemplo: <br>
+            <i>¿Hacéis devoluciones en tienda física?</i>
+            <br><br>
+            Si quieres contactar con nosotros escribe <b>'quiero hablar con un humano'</b> y estaremos dispuestos para ti 😀
+        </p>
+    </header>
+
+    <div class="bg-white p-10 rounded-lg shadow-lg w-full max-w-2xl h-[70vh] flex flex-col relative">
+        <!-- Botón Clear en la esquina superior derecha -->
+        <button onclick="clearChat()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 rounded-lg flex flex-row items-center">
+            <svg class="w-5 h-5 mx-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M566.6 54.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192-34.7-34.7c-4.2-4.2-10-6.6-16-6.6c-12.5 0-22.6 10.1-22.6 22.6l0 29.1L364.3 320l29.1 0c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16l-34.7-34.7 192-192zM341.1 353.4L222.6 234.9c-42.7-3.7-85.2 11.7-115.8 42.3l-8 8C76.5 307.5 64 337.7 64 369.2c0 6.8 7.1 11.2 13.2 8.2l51.1-25.5c5-2.5 9.5 4.1 5.4 7.9L7.3 473.4C2.7 477.6 0 483.6 0 489.9C0 502.1 9.9 512 22.1 512l173.3 0c38.8 0 75.9-15.4 103.4-42.8c30.6-30.6 45.9-73.1 42.3-115.8z"/></svg>
+            Clear
+        </button>
+
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">FAQ</h2>
+        
+        <div id="chat-history" class="flex-1 overflow-y-auto border-b border-gray-200 pb-4"></div>
+        
+        <div id="loading" class="hidden justify-center my-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
+        
+        <div class="flex space-x-2">
+            <input id="question" type="text" class="flex-1 border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Escribe tu pregunta..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendQuestion()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        function getGreeting() {
+            let hour = new Date().getHours();
+            if (hour > 5 && hour <= 12) return "Buenos días";
+            if (hour > 12 && hour <= 20) return "Buenas tardes";
+            return "Buenas noches";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let chatHistory = document.getElementById("chat-history");
+            chatHistory.innerHTML += `<div class="text-left mb-2">
+                                        <span class="inline-block bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">${getGreeting()}, ¿en qué puedo ayudarte?</span>
+                                      </div>`;
+        });
+
+        function sendQuestion(questionText = null) {
+            let question = questionText || document.getElementById("question").value;
+            let chatHistory = document.getElementById("chat-history");
+            let loading = document.getElementById("loading");
+
+            if (!question.trim()) {
+                alert("Por favor, escribe una pregunta.");
+                return;
+            }
+
+            loading.classList.remove("hidden");
+            chatHistory.innerHTML += `<div class="text-right mb-2">
+                                        <span class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-lg">${question}</span>
+                                      </div>`;
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            fetch("/ask/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrfToken
+                },
+                body: `question=${encodeURIComponent(question)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                let responseText = data.answer;
+                chatHistory.innerHTML += `<div class="text-left mb-2">
+                                            <div class="prose prose-sm bg-gray-100 text-gray-800 p-4 rounded-lg">${markdownToHTML(responseText)}</div>
+                                          </div>`;
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                if (data.prompts) {
+                    data.prompts.forEach(prompt => {
+                        chatHistory.innerHTML += `<div class="text-left mb-1">
+                                                    <button class="block w-full text-left bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition" onclick="sendQuestion('${prompt}')">
+                                                        ${markdownToHTML(prompt)}
+                                                    </button>
+                                                  </div>`;
+                        chatHistory.scrollTop = chatHistory.scrollHeight;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                chatHistory.innerHTML += `<div class="text-left mb-2">
+                                            <span class="inline-block bg-red-100 text-red-800 px-4 py-2 rounded-lg">Error al obtener la respuesta.</span>
+                                          </div>`;
+            })
+            .finally(() => {
+                loading.classList.add("hidden");
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            });
+
+            document.getElementById("question").value = "";
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendQuestion();
+            }
+        }
+
+        function markdownToHTML(text) {
+            return text.replace(/\n\n/g, '</p><p>')
+                       .replace(/\n/g, '<br>')
+                       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                       .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                       .replace(/`(.*?)`/g, '<code>$1</code>')
+                       .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                       .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-500 underline">$1</a>');
+        }
+
+        // Función para limpiar el chat
+        function clearChat() {
+            document.getElementById("chat-history").innerHTML = "";
+        }
+    </script>
+</body>
+</html>

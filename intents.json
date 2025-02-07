@@ -1,0 +1,331 @@
+[
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Cuánto tiempo tengo para hacer una devolución?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Puedo devolver un producto sin ticket?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Cuáles son las reglas para cambiar ropa?",
+        "entities": []
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Quiero cambiar un vestido azul por una talla más grande.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 14,
+                "length": 7
+            },
+            {
+                "category": "Color",
+                "offset": 22,
+                "length": 4
+            }
+        ]
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Necesito cambiar mi pantalón negro por una talla M.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 18,
+                "length": 9
+            },
+            {
+                "category": "Color",
+                "offset": 28,
+                "length": 5
+            },
+            {
+                "category": "Talla",
+                "offset": 42,
+                "length": 1
+            }
+        ]
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Me equivoqué de talla, quiero una S en vez de la L.",
+        "entities": [
+            {
+                "category": "Talla",
+                "offset": 31,
+                "length": 1
+            },
+            {
+                "category": "Talla",
+                "offset": 45,
+                "length": 1
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Quiero devolver unos zapatos que no me quedaron bien.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 16,
+                "length": 7
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Compré una camisa y quiero devolverla.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 10,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Me gustaría hacer una devolución de un abrigo rojo.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 36,
+                "length": 6
+            },
+            {
+                "category": "Color",
+                "offset": 43,
+                "length": 4
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "¿Ya se procesó mi devolución con pedido 123456?",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 40,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "Quiero saber el estado de la devolución del pedido 987654.",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 49,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "¿En qué etapa está mi devolución con número de orden 555333?",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 50,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Cuánto tiempo tengo para hacer una devolución si compré online?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Se pueden devolver productos en descuento?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Puedo cambiar una prenda después de usarla?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Puedo devolver ropa interior?",
+        "entities": []
+    },
+    {
+        "intent": "ConsultaPoliticas",
+        "language": "es-es",
+        "text": "¿Cuáles son las condiciones para devolver un abrigo?",
+        "entities": []
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Quiero cambiar mi suéter rojo por una talla más grande.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 18,
+                "length": 7
+            },
+            {
+                "category": "Color",
+                "offset": 26,
+                "length": 4
+            }
+        ]
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Necesito un pantalón azul pero compré uno negro, ¿puedo cambiarlo?",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 10,
+                "length": 9
+            },
+            {
+                "category": "Color",
+                "offset": 20,
+                "length": 4
+            },
+            {
+                "category": "Color",
+                "offset": 41,
+                "length": 5
+            }
+        ]
+    },
+    {
+        "intent": "CambioProducto",
+        "language": "es-es",
+        "text": "Compré una camisa en talla M, pero quiero una S.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 10,
+                "length": 6
+            },
+            {
+                "category": "Talla",
+                "offset": 25,
+                "length": 1
+            },
+            {
+                "category": "Talla",
+                "offset": 41,
+                "length": 1
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Me gustaría devolver un vestido amarillo porque no me gusta.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 24,
+                "length": 7
+            },
+            {
+                "category": "Color",
+                "offset": 32,
+                "length": 7
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Quiero devolver los tenis blancos que compré la semana pasada.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 18,
+                "length": 5
+            },
+            {
+                "category": "Color",
+                "offset": 24,
+                "length": 7
+            }
+        ]
+    },
+    {
+        "intent": "DevolucionProducto",
+        "language": "es-es",
+        "text": "Compré una bufanda roja y quiero regresarla.",
+        "entities": [
+            {
+                "category": "Producto",
+                "offset": 10,
+                "length": 7
+            },
+            {
+                "category": "Color",
+                "offset": 18,
+                "length": 4
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "¿Cuál es el estado de mi devolución con número de orden 456789?",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 51,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "Quiero saber si ya procesaron la devolución del pedido 112233.",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 51,
+                "length": 6
+            }
+        ]
+    },
+    {
+        "intent": "EstadoDevolucion",
+        "language": "es-es",
+        "text": "¿Mi reembolso del pedido 998877 ya fue aprobado?",
+        "entities": [
+            {
+                "category": "NumeroPedido",
+                "offset": 23,
+                "length": 6
+            }
+        ]
+    }
+]
