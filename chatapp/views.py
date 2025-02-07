@@ -14,67 +14,76 @@ def ask_question(request):
 
         session = request.session
         
+        # Analizamos la pregunta con LUIS
         analysis_result = luis_analyze(question)
-
-        intent = analysis_result["top_intent"]
+        new_intent = analysis_result["top_intent"]
         entities = analysis_result.get("entities", {})
 
-        # Recuperamos la intención previa si el usuario no especifica una nueva
-        previous_intent = session.get("intent")
-
-        # Si no se detecta una nueva intención pero hay una previa en sesión, la usamos
-        if previous_intent:
-            intent = previous_intent
-
-        # Guardamos la intención en sesión para referencia futura
-        session["intent"] = intent
-
-        # Recuperamos entidades previas almacenadas en sesión
+        # Recuperamos la intención previa y entidades almacenadas en sesión
+        prev_intent = session.get("intent")
         session_entities = session.get("entities", {})
 
-        # Función para actualizar el contexto con nuevas entidades
+        print(analysis_result)
+
+        # Si la intención ha cambiado, limpiamos la sesión completamente
+        if prev_intent and new_intent != prev_intent and analysis_result["confidence"] > 0.95:
+            session.pop("entities", None)
+            session["intent"] = new_intent
+        elif not prev_intent:
+            session["intent"] = new_intent  # Guardamos la intención si es la primera vez
+
+        # Función para actualizar entidades en sesión
         def update_context(category):
             return next((e["text"] for e in entities if e["category"] == category), session_entities.get(category))
 
-        if intent == "CambioProducto":
-            producto = update_context("Producto")
+        # Manejo especial para Producto: Si el usuario menciona un nuevo producto, lo reemplazamos
+        nuevo_producto = next((e["text"] for e in entities if e["category"] == "Producto"), None)
+        if nuevo_producto:
+            session_entities["Producto"] = nuevo_producto  # Reemplazamos la entidad anterior
+        
+        # Actualizamos las entidades en sesión
+        session["entities"] = session_entities
+
+        # Procesamos la intención detectada
+        if new_intent == "CambioProducto":
+            producto = session_entities.get("Producto")
             talla = update_context("Talla")
 
             # Guardamos el estado actualizado en sesión
             session["entities"] = {"Producto": producto, "Talla": talla}
 
             if producto and talla:
-                response = f"Genial! Vamos a cambiar tu {producto} por una talla {talla}, acude a tienda o al depósito más cercano para hacer efectiva la devolución 😁.\n\n¿Necesitas ayuda con otra cosa?"
+                response = f"Genial! Vamos a cambiar tu {producto} por una talla {talla}. Acude a tienda o al depósito más cercano para hacer efectiva la devolución 😁.\n\n¿Necesitas ayuda con otra cosa?"
                 session.pop("entities", None)
-                session.pop("intent", None)  # Limpiamos la intención al finalizar
+                session.pop("intent", None)  # Limpiamos la intención al completar la tarea
             elif producto:
                 response = f"Para cambiar tu {producto}, ¿puedes decirme la talla que necesitas?"
             else:
                 response = "Necesitamos información sobre el producto que deseas cambiar."
 
-        elif intent == "DevolucionProducto":
-            producto = update_context("Producto")
+        elif new_intent == "DevolucionProducto":
+            producto = session_entities.get("Producto")
             session["entities"] = {"Producto": producto}
 
             if producto:
-                response = f"😰 Ups, sentimos que tengas que devolver tu {producto}.\nPara devolver el producto {producto}, puedes acercarte a nuestra tienda o a tu depósito más cercano. \n\n¿Necesitas ayuda con otra cosa?"
+                response = f"😰 Ups, sentimos que tengas que devolver tu {producto}. Puedes acercarte a nuestra tienda o a tu depósito más cercano.\n\n¿Necesitas ayuda con otra cosa?"
                 session.pop("entities", None)
-                session.pop("intent", None)  # Limpiamos la intención al finalizar
+                session.pop("intent", None)  # Limpiamos la intención al completar la tarea
             else:
                 response = "¿Podrías especificar qué producto deseas devolver?"
 
-        elif intent == "EstadoDevolucion":
+        elif new_intent == "EstadoDevolucion":
             numero_pedido = update_context("NumeroPedido")
             session["entities"] = {"NumeroPedido": numero_pedido}
 
             if numero_pedido:
-                response = f"El estado de tu devolución con número {numero_pedido} está actualmente en proceso. \n\n¿Necesitas ayuda con otra cosa?"
+                response = f"El estado de tu devolución con número {numero_pedido} está actualmente en proceso.\n\n¿Necesitas ayuda con otra cosa?"
                 session.pop("entities", None)
-                session.pop("intent", None)  # Limpiamos la intención al finalizar
+                session.pop("intent", None)  # Limpiamos la intención al completar la tarea
             else:
                 response = "Por favor, proporciona el número de pedido para verificar el estado de tu devolución."
 
-        elif intent == "ConsultaPoliticas":
+        elif new_intent == "ConsultaPoliticas":
             response = consult_qna(question)
             return JsonResponse(response)
 
